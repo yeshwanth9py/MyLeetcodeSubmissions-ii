@@ -11,12 +11,13 @@
 11    bool hasCycle(ListNode *head) {
 12        ListNode* slow = head, *fast = head;
 13
-14        while(fast && fast->next){
-15            slow = slow->next;
-16            fast = fast->next->next;
-17            if(slow == fast) return 1;
-18        }
-19
-20        return 0;
-21    }
-22};
+14        unordered_map<ListNode*, int> ump;
+15        while(head){
+16            if(ump.find(head) != ump.end()) return 1;
+17            ump[head] = 1;
+18            head = head->next;
+19        }
+20
+21        return 0;
+22    }
+23};
