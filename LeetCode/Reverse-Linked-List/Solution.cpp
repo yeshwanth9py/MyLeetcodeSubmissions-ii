@@ -12,18 +12,17 @@
 12public:
 13    ListNode* reverseList(ListNode* head) {
 14        if(head == nullptr){
-15            return nullptr;
+15            return head;
 16        }
 17        if(head->next == nullptr){
 18            return head;
 19        }
 20
 21        ListNode* newh = reverseList(head->next);
-22        if(head->next){
-23            head->next->next = head;
-24        }
-25        head->next = nullptr;
-26
-27        return newh;
-28    }
-29};
+22
+23        head->next->next = head;
+24        head->next = nullptr;
+25
+26        return newh;
+27    }
+28};
