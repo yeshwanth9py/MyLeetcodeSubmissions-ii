@@ -1,0 +1,58 @@
+1class Solution {
+2public:
+3    vector<int> arr;
+4    vector<int> pos;
+5    int m;
+6    int dp[100110];
+7    int rec(int ind){
+8        if(ind == m) return 0;
+9        if(dp[ind] != -1) return dp[ind];
+10        //light this 1
+11        int ans = 1+rec(ind+1);
+12        
+13        if(ind+1<m && pos[ind+1]==pos[ind]+1){
+14            int cur = 1 + rec(ind+2);
+15            ans = min(ans, cur);
+16        }
+17
+18        //light next one
+19        if(ind+1<m && pos[ind+1] == pos[ind]+1){
+20            int cur = 1 + rec(ind+2);
+21            if(ind+2<m && pos[ind+2]==pos[ind+1]+1){
+22                cur = min(cur, 1+rec(ind+3));
+23            }
+24            ans = min(ans, cur);
+25        }
+26        
+27        return dp[ind] = ans;
+28    }
+29    
+30    int minLights(vector<int>& nums) {
+31        int n = nums.size();
+32        arr.resize(n, 0);
+33        memset(dp, -1, sizeof(dp));
+34        
+35        for(int i=0; i<n; i++){
+36            if(nums[i] == 0) continue;
+37            int st = max(0, i-nums[i]);
+38            int en = min(n-1, i+nums[i]);
+39            arr[st]++;
+40            if(en+1<n){
+41                arr[en+1]--;
+42            }
+43        }
+44        
+45        for(int i=0; i<n; i++){
+46            arr[i] += (i-1>=0?arr[i-1]:0);
+47            if(arr[i] == 0){
+48                pos.push_back(i);
+49            }
+50            // cout<<arr[i]<<" ";
+51        }
+52        m = pos.size();
+53        
+54        if(m == 0) return 0;
+55        
+56        return rec(0);
+57    }
+58};
