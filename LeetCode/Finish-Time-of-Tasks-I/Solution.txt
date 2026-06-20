@@ -1,0 +1,40 @@
+1class Solution {
+2public:
+3    vector<long long> fin;
+4    vector<int> bt;
+5    vector<vector<long long>> adjl;
+6    void dfs(long long node, long long pp){
+7        long long noc = 0;
+8        long long minft = 1e18;
+9        long long maxft = -1e18;
+10
+11        for(long long nei: adjl[node]){
+12            if(nei != pp){
+13                dfs(nei, node);
+14                minft = min(minft, fin[nei]);
+15                maxft =max(maxft, fin[nei]);
+16                noc++;
+17            }
+18        }
+19
+20        if(noc == 0){
+21            fin[node] = bt[node];
+22        }else{
+23            fin[node] = 2*maxft - minft + bt[node];
+24        }
+25    }
+26    
+27    long long finishTime(long long n, vector<vector<int>>& edges, vector<int>& baseTime) {
+28        bt = baseTime;
+29        adjl.resize(n, vector<long long>());
+30        for(auto el: edges){
+31            long long u = el[0];
+32            long long v = el[1];
+33            adjl[u].push_back(v);
+34            adjl[v].push_back(u);
+35        }
+36        fin.resize(n, -1);
+37        dfs(0, -1);
+38        return fin[0];
+39    }
+40};
