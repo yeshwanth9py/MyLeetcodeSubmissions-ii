@@ -1,0 +1,25 @@
+1class Solution {
+2public:
+3    int maxDistance(string moves) {
+4        int td = 0;
+5        int lr = 0;
+6        int ex = 0;
+7        for(char ch: moves){
+8            if(ch == 'L'){
+9                lr++;
+10            }else if(ch == 'R'){
+11                lr--;
+12            }else if(ch == 'U'){
+13                td++;
+14            }else if(ch == 'D'){
+15                td--;
+16            }else{
+17                ex++;
+18            }
+19            // cout<<lr<<" "<<
+20        }
+21
+22        return abs(td) + abs(lr) + ex;
+23        
+24    }
+25};
