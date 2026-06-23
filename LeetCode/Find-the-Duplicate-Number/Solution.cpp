@@ -9,14 +9,12 @@
 9            sl = nums[sl];
 10            fs = nums[nums[fs]];
 11        }
-12
-13        sl = nums[0];
-14        while(sl!=fs){
-15            sl = nums[sl];
-16            fs = nums[fs];
-17        }
-18
-19        return sl;
-20
-21    }
-22};
+12        sl = nums[0];
+13        while(sl!=fs){
+14            sl = nums[sl];
+15            fs = nums[fs];
+16        }
+17
+18        return sl;
+19    }
+20};
