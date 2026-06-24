@@ -27,15 +27,15 @@
 27        if(pref[n-1]<0) return -1;
 28
 29        
-30        for(int i=sti; i<n; i++){
-31            int curf = pref[i] - m;
-32            if(curf<0) return -1;
-33        }
+30        // for(int i=sti; i<n; i++){
+31        //     int curf = pref[i] - m;
+32        //     if(curf<0) return -1;
+33        // }
 34
-35        for(int i=0; i<sti; i++){
-36            int curf = pref[n-1] - m + pref[i];
-37            if(curf<0) return -1;
-38        }
+35        // for(int i=0; i<sti; i++){
+36        //     int curf = pref[n-1] - m + pref[i];
+37        //     // if(curf<0) return -1;
+38        // }
 39
 40        return sti;
 41
