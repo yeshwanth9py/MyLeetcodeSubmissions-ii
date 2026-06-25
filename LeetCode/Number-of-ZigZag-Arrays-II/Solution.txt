@@ -1,0 +1,178 @@
+1const MOD = 1_000_000_007
+2const MODINV3 = 333333336
+3const THRES = 300
+4const MAXM = 75
+5
+6var buf1, buf2 [MAXM + 1]int
+7var buf3 [2 * MAXM]int
+8var recs [MAXM + 1][]int
+9var seqs [MAXM + 1][]int
+10
+11func init() {
+12	for m := 1; m <= MAXM; m++ {
+13		limit := 2 * m
+14		s := make([]int, limit)
+15		for i := range limit {
+16			s[i] = solveDP(i+1, m)
+17		}
+18		seqs[m] = s
+19		recs[m] = berlekampMassey(s)
+20	}
+21}
+22
+23func modPow(x, b int) int {
+24	res := 1
+25	for b > 0 {
+26		if b&1 == 1 {
+27			res = res * x % MOD
+28		}
+29		x = x * x % MOD
+30		b >>= 1
+31	}
+32	return res
+33}
+34
+35func solveDP(n, m int) (count int) {
+36	dp := buf1[:m]
+37	k := m / 2
+38	for i := range m {
+39		dp[i] = i
+40	}
+41	for range n - 2 {
+42		var sum int
+43		for j := range k {
+44			v := dp[j]
+45			dp[j] = sum
+46			v, dp[m-1-j] = dp[m-1-j], v
+47			sum += v
+48			if sum >= MOD {
+49				sum -= MOD
+50			}
+51		}
+52		for j := k; j < m; j++ {
+53			dp[j], sum = sum, sum+dp[j]
+54			if sum >= MOD {
+55				sum -= MOD
+56			}
+57		}
+58	}
+59	for i := range m {
+60		count += dp[i]
+61	}
+62	return count * 2 % MOD
+63}
+64
+65func berlekampMassey(s []int) []int {
+66	Bm := buf1[:]
+67	Tm := buf2[:]
+68	C := buf3[:]
+69	clear(C)
+70	clear(Bm)
+71	C[0] = 1
+72	Bm[0] = 1
+73	cLen, bLen := 1, 1
+74	L, m, b := 0, 1, 1
+75	for n := range len(s) {
+76		d := s[n]
+77		for i := 1; i <= L; i++ {
+78			d = (d + C[i]*s[n-i]) % MOD
+79		}
+80		if d == 0 {
+81			m++
+82			continue
+83		}
+84		copy(Tm[:cLen], C[:cLen])
+85		tLen := cLen
+86		coef := d * modPow(b, MOD-2) % MOD
+87		need := bLen + m
+88		if cLen < need {
+89			clear(C[cLen:need])
+90			cLen = need
+91		}
+92		for i := range bLen {
+93			C[i+m] = (C[i+m] - coef*Bm[i]%MOD + MOD) % MOD
+94		}
+95		if 2*L <= n {
+96			L = n + 1 - L
+97			copy(Bm[:tLen], Tm[:tLen])
+98			bLen = tLen
+99			b = d
+100			m = 1
+101		} else {
+102			m++
+103		}
+104	}
+105	recLen := cLen - 1
+106	rec := make([]int, recLen)
+107	for i := range recLen {
+108		rec[i] = MOD - C[i+1]
+109	}
+110	return rec
+111}
+112
+113func combine(a, b, rec []int) []int {
+114	k := len(rec)
+115	sz := 2*k - 1
+116	tmp := buf3[:sz]
+117	clear(tmp)
+118	for i, ai := range a {
+119		if ai == 0 {
+120			continue
+121		}
+122		for j, bj := range b {
+123			if bj != 0 {
+124				tmp[i+j] = (tmp[i+j] + ai*bj) % MOD
+125			}
+126		}
+127	}
+128	for deg := sz - 1; deg >= k; deg-- {
+129		c := tmp[deg]
+130		if c == 0 {
+131			continue
+132		}
+133		for i, r := range rec {
+134			tmp[deg-1-i] = (tmp[deg-1-i] + c*r) % MOD
+135		}
+136	}
+137	return tmp[:k]
+138}
+139
+140func linearRecurrence(seq, rec []int, n int) (sum int) {
+141	k := len(rec)
+142	if n < k {
+143		return seq[n]
+144	}
+145	res := buf1[:k]
+146	base := buf2[:k]
+147	clear(res)
+148	clear(base)
+149	res[0] = 1
+150	if k == 1 {
+151		base[0] = rec[0]
+152	} else {
+153		base[1] = 1
+154	}
+155	for n > 0 {
+156		if n&1 != 0 {
+157			copy(res, combine(res, base, rec))
+158		}
+159		copy(base, combine(base, base, rec))
+160		n >>= 1
+161	}
+162	for i := range k {
+163		sum = (sum + res[i]*seq[i]) % MOD
+164	}
+165	return sum
+166}
+167
+168func zigZagArrays(n, l, r int) int {
+169	m := r - l + 1
+170	switch {
+171	case n == 3:
+172		return m * (m - 1) * (2*m - 1) * MODINV3 % MOD
+173	case n < THRES:
+174		return solveDP(n, m)
+175	default:
+176		return linearRecurrence(seqs[m], recs[m], n-1)
+177	}
+178}
