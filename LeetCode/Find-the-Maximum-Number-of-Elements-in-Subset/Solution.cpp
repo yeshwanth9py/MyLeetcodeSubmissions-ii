@@ -1,51 +1,47 @@
 1class Solution {
 2public:
-3    long long maximumLength(vector<int>& arr) {
-4        unordered_map<long long, long long> vis;
-5        sort(arr.begin(), arr.end());
-6
-7        unordered_map<long long, long long> ump;
-8        for(long long el: arr){
-9            ump[el]++;
-10        }
-11        long long n = arr.size();
-12        long long maxl = 1;
-13
-14        for(long long i=0; i<n; i++){
-15            long long cur = arr[i];
-16            if(vis[cur]) continue;
-17            cout<<cur<<" ";
-18            long long cl = 0;
-19            long long x = cur;
-20            if(x == 1){
-21                long long f = ump[x];
-22                if(f%2 == 1){
-23                    maxl = max(maxl, f);
-24                }else{
-25                    maxl = max(maxl, f-1);
-26                }
-27                vis[x] = 1;
-28                continue;
-29            }
-30            while(1){
-31                if(ump[cur] >= 2){
-32                    cl+=2;
-33                    vis[cur] = 1;
-34                    cur = cur*cur;
-35                }else if(ump[cur] == 1){
-36                    cl+=1;
-37                    vis[cur] = 1;
-38                    maxl = max(maxl, cl);
-39                    // cout<<maxl<<endl;
-40                    break;
-41                }else{
-42                    maxl = max(maxl, cl-1);
-43                    cout<<maxl<<endl;
-44                    break;
-45                }
-46            }
-47        }
-48
-49        return maxl;
-50    }
-51};
+3    long long maximumLength(vector<int>& nums) {
+4        //get the head in a chain approach
+5        unordered_map<long long, long long> ump;
+6        for(long long el: nums){
+7            ump[el]++;
+8        }
+9        long long maxl = 1;
+10
+11        for(long long el: nums){
+12            if(el == 1){
+13                long long fl = ump[el];
+14                if(fl%2 == 1){
+15                    maxl = max(maxl, fl);
+16                }else{
+17                    maxl = max(maxl, fl-1);
+18                }
+19                continue;
+20            }
+21            long long sq = sqrt(el);
+22            // if(sq*sq != el) continue;
+23            if(sq*sq==el && ump[sq]>=2) continue;
+24            long long cl = 0;
+25            long long cur = el;
+26            // cout<<cur<<" ";
+27            while(1){
+28                if(ump[cur]>=2){
+29                    cl+=2;
+30                    cur = cur*cur;
+31                }else if(ump[cur] == 1){
+32                    cl+=1;
+33                    maxl = max(maxl, cl);
+34                    cout<<cl<<endl;
+35                    break;
+36                }else{
+37                    maxl = max(maxl, cl-1);
+38                    cout<<cl<<endl;
+39                    break;
+40                }
+41            }
+42        }
+43
+44        return maxl;
+45
+46    }
+47};
