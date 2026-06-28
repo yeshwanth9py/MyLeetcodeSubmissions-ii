@@ -1,0 +1,39 @@
+1class Solution {
+2public:
+3    vector<vector<int>> filterOccupiedIntervals(vector<vector<int>>& arr, int fs, int fe) {
+4        sort(arr.begin(), arr.end());
+5        int n = arr.size();
+6        vector<vector<int>> narr;
+7        int i = 0;
+8        bool prev = 0;
+9        while(i<n){
+10            int st = arr[i][0];
+11            int j = i;
+12            int en = arr[j][1];
+13            while(j<n && arr[j][0]<=en+1){
+14                en = max(en, arr[j][1]);
+15                j++;
+16            }
+17            if(st<=fs && en>=fe){
+18                if(st<=fs-1){
+19                    narr.push_back({st, fs-1});
+20                }
+21                if(fe+1<=en){
+22                    narr.push_back({fe+1, en});
+23                }
+24            }else if(st>=fs && en<=fe){
+25                
+26            }else if(st<fs && en>=fs && en<=fe){
+27                narr.push_back({st, fs-1});
+28            }else if(st<=fe && en>=fe){
+29                if(en>=fe+1) narr.push_back({fe+1, en});
+30            }else{
+31                narr.push_back({st, en});
+32            }
+33            i = j;
+34        }
+35        
+36        
+37        return narr;
+38    }
+39};
