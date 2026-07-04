@@ -1,0 +1,14 @@
+1class Solution {
+2public:
+3    bool isMiddleElementUnique(vector<int>& nums) {
+4        int mid = nums.size()/2;
+5        int tag = nums[mid];
+6        int cnt = 0;
+7        for(int el: nums){
+8            if(el == tag){
+9                cnt++;
+10            }
+11        }
+12        return cnt==1;
+13    }
+14};
