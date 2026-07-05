@@ -1,0 +1,20 @@
+1class Solution {
+2public:
+3    int maxDigitRange(vector<int>& nums) {
+4        map<int, int> ump;
+5        for(int el: nums){
+6            string s = to_string(el);
+7            sort(s.begin(), s.end());
+8            int sd = s[0]-'0';
+9            int ld = s[s.size()-1]-'0';
+10            int dr = ld-sd;
+11            ump[dr] += el;
+12        }
+13
+14        return ump.rbegin()->second;
+15
+16        
+17        
+18        
+19    }
+20};
