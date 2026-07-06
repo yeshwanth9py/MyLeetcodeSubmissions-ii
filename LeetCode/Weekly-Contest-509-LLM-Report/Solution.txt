@@ -1,0 +1,35 @@
+1/**
+2 * @param {number[]} nums
+3 * @return {number}
+4 */
+5var maxDigitRange = function(nums) {
+6    const getRange = (x) => {
+7        let minDigit = 9;
+8        let maxDigit = 0;
+9        
+10        while (x > 0) {
+11            const d = x % 10;
+12            if (d < minDigit) minDigit = d;
+13            if (d > maxDigit) maxDigit = d;
+14            x = Math.floor(x / 10);
+15        }
+16        
+17        return maxDigit - minDigit;
+18    };
+19    
+20    let bestRange = -1;
+21    let sum = 0;
+22    
+23    for (const num of nums) {
+24        const range = getRange(num);
+25        
+26        if (range > bestRange) {
+27            bestRange = range;
+28            sum = num;
+29        } else if (range === bestRange) {
+30            sum += num;
+31        }
+32    }
+33    
+34    return sum;
+35};
