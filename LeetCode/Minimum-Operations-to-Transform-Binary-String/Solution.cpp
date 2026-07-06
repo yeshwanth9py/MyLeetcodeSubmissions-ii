@@ -1,19 +1,42 @@
-    int minOperations(string s1, string s2) {
-        if (s1 == "1" && s2 == "0") {
-            return -1;
-        }
-        int res = 0, n = s1.length();
-        for (int i = 0; i < n; i++) {
-            if (s1[i] == s2[i])
-                continue;
-            if (s1[i] == '0') {
-                res++;
-            } else if (i < n - 1) {
-                res += s1[i + 1] == '1' ? 1 : 2;
-                s1[i + 1] = '0';
-            } else {
-                res += 2;
-            }
-        }
-        return res;
-    }
+class Solution:
+    def minOperations(self, s: str, t: str) -> int:
+        if s == t:
+            return 0
+        s = list(s)
+        t = list(t)
+        n = len(s)
+        ans = 0
+        for i in range(n):
+            if s[i] == t[i]:
+                continue
+            if s[i] == '0':                       # need '1' here
+                s[i] = '1'
+                ans += 1
+                continue
+            # s[i] == '1', t[i] == '0'
+            if i + 1 < n and s[i + 1] == '1':     # pair with a right '1'
+                s[i + 1] = '0'
+                s[i] = '0'
+                ans += 1
+                continue
+            if i - 1 >= 0 and s[i - 1] == '1':    # pair with left '1', then restore it
+                s[i] = t[i]
+                ans += 1
+                ans += 1 if t[i - 1] == '1' else 0
+                s[i - 1] = t[i - 1]
+                continue
+            if i + 1 < n and s[i + 1] == '0':     # create a right '1' first
+                s[i] = t[i]
+                ans += 2
+                ans += 1 if t[i + 1] == '1' else 0
+                s[i + 1] = t[i + 1]
+                continue
+            if i - 1 >= 0 and s[i - 1] == '0':    # create a left '1' first
+                s[i] = t[i]
+                ans += 2
+                ans += 1 if t[i - 1] == '1' else 0
+                s[i - 1] = t[i - 1]
+                continue
+        if s != t:
+            return -1
+        return ans
