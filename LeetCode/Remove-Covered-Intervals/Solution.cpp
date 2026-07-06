@@ -1,29 +1,25 @@
-1#include <vector>
-2#include <algorithm>
-3
-4class Solution {
-5public:
-6    int removeCoveredIntervals(std::vector<std::vector<int>>& intervals) {
-7        // Custom comparator for sorting
-8        std::sort(intervals.begin(), intervals.end(), [](const std::vector<int>& a, const std::vector<int>& b) {
-9            if (a[0] == b[0]) {
-10                return a[1] > b[1]; // Descending order of end point if start points are equal
-11            }
-12            return a[0] < b[0]; // Ascending order of start point
-13        });
-14        
-15        int remainingCount = 0;
-16        int prevEnd = 0;
-17        
-18        for (const auto& interval : intervals) {
-19            // If the current interval's end point extends past the previous maximum end point,
-20            // it means this interval is NOT covered by any preceding interval.
-21            if (interval[1] > prevEnd) {
-22                remainingCount++;
-23                prevEnd = interval[1]; // Update the maximum right endpoint tracked
-24            }
-25        }
-26        
-27        return remainingCount;
-28    }
-29};
+1class Solution {
+2public:
+3    int removeCoveredIntervals(vector<vector<int>>& arr) {
+4        int n = arr.size();
+5        sort(arr.begin(), arr.end(), [&](vector<int> &a1, vector<int> &a2){
+6            if(a1[0] != a2[0]) return a1[0]<a2[0];
+7            return a1[1]>a2[1];
+8        });
+9
+10        int i=0;
+11        int cnt = 0;
+12        while(i<n){
+13            int j = i;
+14            int st = arr[i][0];
+15            int en = arr[i][1];
+16            while(j+1<n && arr[j+1][1]<=en){
+17                j++;
+18            }
+19            cnt++;
+20            i = j+1;
+21        }
+22
+23        return cnt;
+24    }
+25};
