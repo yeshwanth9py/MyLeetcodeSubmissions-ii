@@ -14,7 +14,7 @@
 14        int val = 0;
 15        if(s!=""){
 16            reverse(s.begin(), s.end());
-17            val = stoi(s);
+17            val = stoll(s);
 18        }
 19        return (1LL*val*sm);
 20    }
