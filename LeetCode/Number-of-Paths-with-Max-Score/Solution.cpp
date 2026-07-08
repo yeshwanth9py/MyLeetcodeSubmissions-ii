@@ -1,65 +1,57 @@
-class Solution {
-public:
-    vector<int> pathsWithMaxScore(vector<string>& board) {
-        const int MOD = 1000000007;
-        int n = board.size();
-
-        vector<int> nextScore(n + 1, -1);
-        vector<int> nextWays(n + 1, 0);
-
-        for (int i = n - 1; i >= 0; --i) {
-            vector<int> currScore(n + 1, -1);
-            vector<int> currWays(n + 1, 0);
-
-            for (int j = n - 1; j >= 0; --j) {
-                char cell = board[i][j];
-
-                if (cell == 'X') {
-                    continue;
-                }
-
-                if (cell == 'S') {
-                    currScore[j] = 0;
-                    currWays[j] = 1;
-                    continue;
-                }
-
-                int best = max({
-                    nextScore[j],
-                    currScore[j + 1],
-                    nextScore[j + 1]
-                });
-
-                if (best == -1) {
-                    continue;
-                }
-
-                long long ways = 0;
-
-                if (nextScore[j] == best) {
-                    ways += nextWays[j];
-                }
-                if (currScore[j + 1] == best) {
-                    ways += currWays[j + 1];
-                }
-                if (nextScore[j + 1] == best) {
-                    ways += nextWays[j + 1];
-                }
-
-                int value = (cell == 'E') ? 0 : cell - '0';
-
-                currScore[j] = best + value;
-                currWays[j] = ways % MOD;
-            }
-
-            nextScore = move(currScore);
-            nextWays = move(currWays);
-        }
-
-        if (nextScore[0] == -1) {
-            return {0, 0};
-        }
-
-        return {nextScore[0], nextWays[0]};
-    }
-};
+1class Solution {
+2public:
+3    const long long mod = 1e9+7;
+4    long long n, m;
+5    vector<string> arr;
+6    vector<vector<long long>> cnt;
+7    long long dp[111][111];
+8
+9    long long rec(long long r, long long c){
+10        if(r<0 || c<0 || r>=n || c>=m || arr[r][c] == 'X') return -1e9;
+11        if(r == 0 && c == 0){
+12            cnt[r][c] = 1;
+13            return 0;
+14        }
+15
+16        if(dp[r][c] != -1) return dp[r][c];
+17
+18        long long down = rec(r-1, c);
+19        long long right = rec(r, c-1);
+20        long long diag = rec(r-1, c-1);
+21
+22        long long mxv = max({down, right, diag});
+23        if(mxv<0){
+24            cnt[r][c] = 0;
+25            return dp[r][c] = mxv;
+26        }
+27        cnt[r][c] = 0;
+28        if(mxv == down && r-1>=0){
+29            cnt[r][c] += cnt[r-1][c];
+30            cnt[r][c] = (cnt[r][c]%mod + mod)%mod;
+31        }
+32        if(mxv == right && c-1>=0){
+33            cnt[r][c] += cnt[r][c-1];
+34            cnt[r][c] = (cnt[r][c]%mod + mod)%mod;
+35        }
+36        if(mxv == diag && r-1>=0 && c-1>=0){
+37            cnt[r][c] += (cnt[r-1][c-1]);
+38            cnt[r][c] = (cnt[r][c]%mod + mod)%mod;
+39        }
+40
+41        return dp[r][c] = ((mxv + arr[r][c]-'0')%mod + mod)%mod;
+42    }
+43
+44    vector<int> pathsWithMaxScore(vector<string>& arr) {
+45        n = arr.size();
+46        m = arr[0].size();
+47        arr[n-1][m-1] = '0';
+48        arr[0][0] = '0';
+49        cnt.assign(n, vector<long long>(m, 0));
+50
+51        this->arr = arr;
+52        memset(dp, -1, sizeof(dp));
+53        int ans = rec(n-1, m-1);
+54        if(ans<0) return {0, 0};
+55        return {ans, (int) cnt[n-1][m-1]};
+56    }
+57};
