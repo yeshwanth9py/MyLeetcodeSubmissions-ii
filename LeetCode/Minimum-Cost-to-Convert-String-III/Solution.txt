@@ -1,0 +1,61 @@
+1class Solution {
+2public:
+3    string s, t;
+4    int n;
+5    vector<vector<string>> rules;
+6    vector<int> costs;
+7    int dp[5011];
+8    int rec(int ind){
+9        if(ind == n){
+10            return 0;
+11        }
+12        if(dp[ind] != -1) return dp[ind];
+13        int ans = 1e9;
+14        if(s[ind] == t[ind]){
+15            ans = min(ans, rec(ind+1));
+16        }
+17        
+18        for(int i=0; i<rules.size(); i++){
+19            string orig = rules[i][0];
+20            string dup = rules[i][1];
+21            bool pos = 1;
+22            int scc = 0;
+23            for(int j=0; j<orig.size(); j++){
+24                if((orig[j] == s[ind+j]) && (dup[j] == t[ind+j])){
+25                    
+26                }else if(orig[j] == '*' && (dup[j] == t[ind+j])){
+27                    scc++;
+28                }else{
+29                    pos = 0;
+30                    break;
+31                }
+32            }
+33
+34            if(pos){
+35                ans = min(ans, costs[i]+scc+rec(ind+orig.size()));
+36            }
+37        }
+38
+39        return dp[ind] = ans;
+40    }
+41
+42    
+43    int minCost(string source, string target, vector<vector<string>>& rules, vector<int>& costs) {
+44        s = source;
+45        t = target;
+46        n = s.size();
+47        this->rules = rules;
+48        this->costs = costs;
+49        memset(dp, -1, sizeof(dp));
+50        int ans = rec(0);
+51        if(ans>=1e8) return -1;
+52        return ans;
+53    }
+54};
+55
+56
+57
+58
+59
+60
+61
