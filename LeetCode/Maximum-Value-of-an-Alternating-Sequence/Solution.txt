@@ -1,0 +1,14 @@
+1class Solution {
+2public:
+3    long long maximumValue(long long n, long long s, long long m) {
+4        long long mx = s;
+5        if(n == 1) return mx;
+6        if(n%2 == 1){
+7            n--;
+8        }
+9        long long add = (n/2)*m;
+10        long long mone = -((n-1)/2);
+11        s = s + add + mone;
+12        return s;
+13    }
+14};
