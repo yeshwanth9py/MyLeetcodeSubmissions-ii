@@ -1,0 +1,33 @@
+1class Solution {
+2public:
+3    const long long mod = 1e9+7;
+4    long long minAdjacentSwaps(vector<int>& nums, long long a, long long b) {
+5        long long ans1 = 0;
+6        long long fj = 0;
+7        long long n = nums.size();
+8
+9        vector<long long> onums;
+10        for(long long i=0; i<n; i++){
+11            if(nums[i] < a){
+12                ans1 += (i-fj);
+13                ans1 = (ans1%mod + mod)%mod;
+14                fj++;
+15            }else{
+16                onums.push_back(nums[i]);
+17            }
+18        }
+19        
+20        fj = 0;
+21
+22        for(long long i=0; i<onums.size(); i++){
+23            if(onums[i]<=b){
+24                ans1 += (i-fj);
+25                ans1 = (ans1%mod + mod)%mod;
+26                fj++;
+27            }
+28        }
+29
+30        return ans1;
+31    }
+32};
+33
