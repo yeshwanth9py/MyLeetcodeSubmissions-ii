@@ -1,272 +1,376 @@
-1#include <bits/stdc++.h>
-2using namespace std;
-3
-4class Solution {
-5    class SegmentTree {
-6        int n;
-7        vector<int> tree;
-8
-9        void build(int node, int left, int right,
-10                   const vector<int>& arr) {
-11            if (left == right) {
-12                tree[node] = arr[left];
-13                return;
-14            }
-15
-16            int mid = left + (right - left) / 2;
-17
-18            build(2 * node, left, mid, arr);
-19            build(2 * node + 1, mid + 1, right, arr);
-20
-21            tree[node] = max(tree[2 * node],
-22                             tree[2 * node + 1]);
-23        }
+1class Solution {
+2public:
+3    vector<int> seg;
+4
+5    /*
+6        Build segment tree over the gain array.
+7
+8        gain[i] tells us the maximum number of new ones
+9        obtained by selecting one-block i, assuming both
+10        neighbouring zero blocks are completely available.
+11    */
+12    void build(
+13        int ind,
+14        int low,
+15        int high,
+16        vector<int>& gain
+17    ) {
+18        if(low == high) {
+19            seg[ind] = gain[low];
+20            return;
+21        }
+22
+23        int mid = low + (high - low) / 2;
 24
-25        int query(int node, int left, int right,
-26                  int queryLeft, int queryRight) {
-27            // No overlap
-28            if (right < queryLeft || queryRight < left) {
-29                return 0;
-30            }
-31
-32            // Complete overlap
-33            if (queryLeft <= left && right <= queryRight) {
-34                return tree[node];
-35            }
-36
-37            // Partial overlap
-38            int mid = left + (right - left) / 2;
-39
-40            return max(
-41                query(2 * node, left, mid,
-42                      queryLeft, queryRight),
-43
-44                query(2 * node + 1, mid + 1, right,
-45                      queryLeft, queryRight)
-46            );
+25        build(2 * ind + 1, low, mid, gain);
+26        build(2 * ind + 2, mid + 1, high, gain);
+27
+28        seg[ind] = max(
+29            seg[2 * ind + 1],
+30            seg[2 * ind + 2]
+31        );
+32    }
+33
+34    /*
+35        Return maximum gain in block-index range [ql, qr].
+36    */
+37    int getMaximum(
+38        int ind,
+39        int low,
+40        int high,
+41        int ql,
+42        int qr
+43    ) {
+44        // No overlap
+45        if(high < ql || low > qr) {
+46            return 0;
 47        }
 48
-49    public:
-50        SegmentTree(const vector<int>& arr) {
-51            n = arr.size();
-52
-53            tree.assign(4 * max(1, n), 0);
-54
-55            if (n > 0) {
-56                build(1, 0, n - 1, arr);
-57            }
-58        }
-59
-60        int query(int left, int right) {
-61            if (n == 0 || left > right) {
-62                return 0;
-63            }
+49        // Complete overlap
+50        if(ql <= low && high <= qr) {
+51            return seg[ind];
+52        }
+53
+54        // Partial overlap
+55        int mid = low + (high - low) / 2;
+56
+57        int leftAnswer = getMaximum(
+58            2 * ind + 1,
+59            low,
+60            mid,
+61            ql,
+62            qr
+63        );
 64
-65            return query(1, 0, n - 1, left, right);
-66        }
-67    };
-68
-69public:
-70    vector<int> maxActiveSectionsAfterTrade(
-71        string s,
-72        vector<vector<int>>& queries
-73    ) {
-74        int n = s.size();
+65        int rightAnswer = getMaximum(
+66            2 * ind + 2,
+67            mid + 1,
+68            high,
+69            ql,
+70            qr
+71        );
+72
+73        return max(leftAnswer, rightAnswer);
+74    }
 75
-76        // Number of active positions in the original string.
-77        int totalOnes = count(s.begin(), s.end(), '1');
-78
-79        // Required variable mentioned in the problem statement.
-80        string relominexa = s;
+76    vector<int> maxActiveSectionsAfterTrade(
+77        string s,
+78        vector<vector<int>>& queries
+79    ) {
+80        int n = s.size();
 81
 82        /*
-83            Store every complete zero-block.
+83            Count the total number of ones in the complete string.
 84
-85            Example:
+85            Every answer starts with this value.
 86
-87            s = "1000110010"
-88
-89            Zero-blocks:
-90            index 0 -> positions [1, 3], length 3
-91            index 1 -> positions [6, 7], length 2
-92            index 2 -> position  [9, 9], length 1
-93        */
-94        vector<int> zeroStart;
-95        vector<int> zeroEnd;
-96        vector<int> zeroLength;
+87            A trade only adds some previously-zero positions.
+88            The selected one-block eventually becomes one again.
+89        */
+90        int totalOnes = 0;
+91
+92        for(char ch : s) {
+93            if(ch == '1') {
+94                totalOnes++;
+95            }
+96        }
 97
 98        /*
-99            groupAt[i] = zero-block containing index i.
+99            Store every maximal block of ones.
 100
-101            groupAt[i] remains -1 when s[i] == '1'.
-102        */
-103        vector<int> groupAt(n, -1);
-104
-105        for (int i = 0; i < n;) {
-106            if (s[i] == '1') {
-107                i++;
-108                continue;
-109            }
+101            Example:
+102            s = "001110011"
+103
+104            ones = {
+105                {2, 4},
+106                {7, 8}
+107            };
+108        */
+109        vector<pair<int, int>> ones;
 110
-111            int start = i;
-112            int groupIndex = zeroLength.size();
-113
-114            while (i < n && s[i] == '0') {
-115                groupAt[i] = groupIndex;
-116                i++;
-117            }
-118
-119            int end = i - 1;
-120
-121            zeroStart.push_back(start);
-122            zeroEnd.push_back(end);
-123            zeroLength.push_back(end - start + 1);
+111        int start = -1;
+112
+113        for(int i = 0; i < n; i++) {
+114            if(s[i] == '1') {
+115                if(start == -1) {
+116                    start = i;
+117                }
+118            } else {
+119                if(start != -1) {
+120                    ones.push_back({start, i - 1});
+121                    start = -1;
+122                }
+123            }
 124        }
 125
-126        int numberOfGroups = zeroLength.size();
-127
-128        /*
-129            nextGroup[i] = first zero-block that intersects
-130                           position i or comes after i.
-131        */
-132        vector<int> nextGroup(n, -1);
-133
-134        int next = -1;
-135
-136        for (int i = n - 1; i >= 0; i--) {
-137            if (groupAt[i] != -1) {
-138                next = groupAt[i];
-139            }
-140
-141            nextGroup[i] = next;
-142        }
-143
-144        /*
-145            previousGroup[i] = last zero-block that intersects
-146                               position i or comes before i.
-147        */
-148        vector<int> previousGroup(n, -1);
-149
-150        int previous = -1;
+126        // Handle a one-block ending at n-1
+127        if(start != -1) {
+128            ones.push_back({start, n - 1});
+129        }
+130
+131        /*
+132            prev0[i] =
+133            number of consecutive zeros ending at i.
+134
+135            Example:
+136            s = "1000"
+137
+138            prev0 = [0, 1, 2, 3]
+139        */
+140        vector<int> prev0(n, 0);
+141
+142        for(int i = 0; i < n; i++) {
+143            if(s[i] == '0') {
+144                prev0[i] = 1;
+145
+146                if(i > 0) {
+147                    prev0[i] += prev0[i - 1];
+148                }
+149            }
+150        }
 151
-152        for (int i = 0; i < n; i++) {
-153            if (groupAt[i] != -1) {
-154                previous = groupAt[i];
-155            }
-156
-157            previousGroup[i] = previous;
-158        }
-159
-160        /*
-161            pairSum[i] stores the sum of two consecutive
-162            complete zero-blocks:
-163
-164            pairSum[i] =
-165                zeroLength[i] + zeroLength[i + 1]
-166        */
-167        vector<int> pairSum;
-168
-169        for (int i = 0; i + 1 < numberOfGroups; i++) {
-170            pairSum.push_back(
-171                zeroLength[i] + zeroLength[i + 1]
-172            );
-173        }
+152        /*
+153            next0[i] =
+154            number of consecutive zeros starting at i.
+155
+156            Example:
+157            s = "0001"
+158
+159            next0 = [3, 2, 1, 0]
+160        */
+161        vector<int> next0(n, 0);
+162
+163        for(int i = n - 1; i >= 0; i--) {
+164            if(s[i] == '0') {
+165                next0[i] = 1;
+166
+167                if(i + 1 < n) {
+168                    next0[i] += next0[i + 1];
+169                }
+170            }
+171        }
+172
+173        int numberOfOneBlocks = ones.size();
 174
-175        SegmentTree segmentTree(pairSum);
-176
-177        vector<int> answer;
+175        /*
+176            starts[i] = start of one-block i
+177            ends[i]   = end of one-block i
 178
-179        for (const vector<int>& query : queries) {
-180            int left = query[0];
-181            int right = query[1];
-182
-183            int firstGroup = nextGroup[left];
-184            int lastGroup = previousGroup[right];
-185
-186            /*
-187                A trade requires two different zero-blocks
-188                with a one-block between them.
-189
-190                If the query contains fewer than two zero-blocks,
-191                no valid trade is possible.
-192            */
-193            if (firstGroup == -1 ||
-194                lastGroup == -1 ||
-195                firstGroup >= lastGroup) {
-196
-197                answer.push_back(totalOnes);
-198                continue;
-199            }
+179            These arrays are used for binary search.
+180        */
+181        vector<int> starts(numberOfOneBlocks);
+182        vector<int> ends(numberOfOneBlocks);
+183
+184        /*
+185            gain[i] = complete left zeros + complete right zeros
+186        */
+187        vector<int> gain(numberOfOneBlocks, 0);
+188
+189        for(int i = 0; i < numberOfOneBlocks; i++) {
+190            int oneStart = ones[i].first;
+191            int oneEnd = ones[i].second;
+192
+193            starts[i] = oneStart;
+194            ends[i] = oneEnd;
+195
+196            /*
+197                If the one-block touches the beginning or end
+198                of the complete string, it does not have zeros
+199                on both sides globally.
 200
-201            /*
-202                The first zero-block may begin before left.
-203
-204                Therefore, count only its part inside [left, right].
-205            */
-206            int firstPart =
-207                min(zeroEnd[firstGroup], right) -
-208                max(zeroStart[firstGroup], left) + 1;
-209
-210            /*
-211                The last zero-block may end after right.
-212
-213                Therefore, count only its part inside [left, right].
-214            */
-215            int lastPart =
-216                min(zeroEnd[lastGroup], right) -
-217                max(zeroStart[lastGroup], left) + 1;
-218
-219            int bestGain = 0;
-220
-221            /*
-222                Candidate 1:
-223                Use the first and second zero-blocks.
+201                Such a block can never be strictly inside a query
+202                with a zero on both sides.
+203            */
+204            if(oneStart > 0 && oneEnd + 1 < n) {
+205                int completeLeftZeros =
+206                    prev0[oneStart - 1];
+207
+208                int completeRightZeros =
+209                    next0[oneEnd + 1];
+210
+211                gain[i] =
+212                    completeLeftZeros +
+213                    completeRightZeros;
+214            }
+215        }
+216
+217        /*
+218            Build segment tree over one-block gains.
+219        */
+220        seg.assign(
+221            4 * max(1, numberOfOneBlocks),
+222            0
+223        );
 224
-225                If there are exactly two zero-blocks,
-226                both may be partial.
-227            */
-228            if (firstGroup + 1 == lastGroup) {
-229                bestGain = firstPart + lastPart;
-230            } else {
-231                bestGain =
-232                    firstPart +
-233                    zeroLength[firstGroup + 1];
-234            }
+225        if(numberOfOneBlocks > 0) {
+226            build(
+227                0,
+228                0,
+229                numberOfOneBlocks - 1,
+230                gain
+231            );
+232        }
+233
+234        vector<int> answer;
 235
-236            /*
-237                Candidate 2:
-238                Use the last two zero-blocks.
-239            */
-240            if (lastGroup - 1 != firstGroup) {
-241                bestGain = max(
-242                    bestGain,
-243                    zeroLength[lastGroup - 1] + lastPart
-244                );
-245            }
-246
-247            /*
-248                Candidate 3:
-249                Both zero-blocks are completely inside
-250                the query.
+236        for(auto& currentQuery : queries) {
+237            int l = currentQuery[0];
+238            int r = currentQuery[1];
+239
+240            /*
+241                Find first one-block satisfying:
+242
+243                    oneStart > l
+244            */
+245            int first =
+246                upper_bound(
+247                    starts.begin(),
+248                    starts.end(),
+249                    l
+250                ) - starts.begin();
 251
-252                pairSum[i] represents zero-blocks i and i+1.
-253            */
-254            int internalLeft = firstGroup + 1;
-255            int internalRight = lastGroup - 2;
-256
-257            if (internalLeft <= internalRight) {
-258                bestGain = max(
-259                    bestGain,
-260                    segmentTree.query(
-261                        internalLeft,
-262                        internalRight
-263                    )
-264                );
-265            }
-266
-267            answer.push_back(totalOnes + bestGain);
-268        }
-269
-270        return answer;
-271    }
-272};
+252            /*
+253                Find last one-block satisfying:
+254
+255                    oneEnd < r
+256            */
+257            int last =
+258                lower_bound(
+259                    ends.begin(),
+260                    ends.end(),
+261                    r
+262                ) - ends.begin() - 1;
+263
+264            /*
+265                If first > last, there is no one-block
+266                strictly inside the query.
+267            */
+268            if(first > last) {
+269                answer.push_back(totalOnes);
+270                continue;
+271            }
+272
+273            /*
+274                Calculate the exact gain of a boundary candidate.
+275
+276                Unlike a middle candidate, its neighbouring
+277                zero block may be partially outside the query.
+278            */
+279            auto calculateExactGain = [&](int blockIndex) {
+280                int oneStart = ones[blockIndex].first;
+281                int oneEnd = ones[blockIndex].second;
+282
+283                /*
+284                    Complete number of consecutive zeros
+285                    before this one-block.
+286                */
+287                int completeLeftZeros =
+288                    prev0[oneStart - 1];
+289
+290                /*
+291                    But only oneStart-l positions are present
+292                    before it inside this query.
+293                */
+294                int availableLeftPositions =
+295                    oneStart - l;
+296
+297                int leftZeros = min(
+298                    completeLeftZeros,
+299                    availableLeftPositions
+300                );
+301
+302                /*
+303                    Complete number of consecutive zeros
+304                    after this one-block.
+305                */
+306                int completeRightZeros =
+307                    next0[oneEnd + 1];
+308
+309                /*
+310                    But only r-oneEnd positions are present
+311                    after it inside this query.
+312                */
+313                int availableRightPositions =
+314                    r - oneEnd;
+315
+316                int rightZeros = min(
+317                    completeRightZeros,
+318                    availableRightPositions
+319                );
+320
+321                return leftZeros + rightZeros;
+322            };
+323
+324            int bestGain = 0;
+325
+326            /*
+327                First valid block may be clipped from the left.
+328            */
+329            bestGain = max(
+330                bestGain,
+331                calculateExactGain(first)
+332            );
+333
+334            /*
+335                Last valid block may be clipped from the right.
+336
+337                If first == last, this simply calculates the
+338                same block again, which is harmless.
+339            */
+340            bestGain = max(
+341                bestGain,
+342                calculateExactGain(last)
+343            );
+344
+345            /*
+346                Candidates strictly between first and last
+347                have complete zero blocks on both sides.
+348
+349                Therefore, use their precomputed gains.
+350            */
+351            int middleLeft = first + 1;
+352            int middleRight = last - 1;
+353
+354            if(middleLeft <= middleRight) {
+355                int middleBest = getMaximum(
+356                    0,
+357                    0,
+358                    numberOfOneBlocks - 1,
+359                    middleLeft,
+360                    middleRight
+361                );
+362
+363                bestGain = max(
+364                    bestGain,
+365                    middleBest
+366                );
+367            }
+368
+369            answer.push_back(
+370                totalOnes + bestGain
+371            );
+372        }
+373
+374        return answer;
+375    }
+376};
