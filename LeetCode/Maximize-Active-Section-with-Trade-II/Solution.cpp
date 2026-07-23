@@ -1,272 +1,134 @@
-1#include <bits/stdc++.h>
-2using namespace std;
-3
-4class Solution {
-5    class SegmentTree {
-6        int n;
-7        vector<int> tree;
-8
-9        void build(int node, int left, int right,
-10                   const vector<int>& arr) {
-11            if (left == right) {
-12                tree[node] = arr[left];
-13                return;
-14            }
-15
-16            int mid = left + (right - left) / 2;
-17
-18            build(2 * node, left, mid, arr);
-19            build(2 * node + 1, mid + 1, right, arr);
-20
-21            tree[node] = max(tree[2 * node],
-22                             tree[2 * node + 1]);
-23        }
-24
-25        int query(int node, int left, int right,
-26                  int queryLeft, int queryRight) {
-27            // No overlap
-28            if (right < queryLeft || queryRight < left) {
-29                return 0;
-30            }
+1struct Seg{
+2    vector<int> t;
+3    Seg(int n, vector<int> &gain){
+4        t.resize(4*n, 0);
+5        build(1, 0, n-1, gain);
+6    }
+7
+8    void build(int idx, int l, int r, vector<int> &gain){
+9        if(l == r){
+10            t[idx] = gain[l];
+11            return;
+12        }
+13
+14        int mid = (l+r)/2;
+15        build(2*idx, l, mid, gain);
+16        build(2*idx+1, mid+1, r, gain);
+17        t[idx] = max(t[2*idx], t[2*idx+1]);
+18    }
+19
+20    
+21    int query(int idx, int l, int r, int ql, int qr){
+22        if(r<ql || l>qr) return 0;
+23        if(l>=ql && r<=qr){
+24            return t[idx];
+25        }
+26        int mid = (l+r)/2;
+27        return max(query(2*idx, l, mid, ql, qr), query(2*idx+1, mid+1, r, ql, qr));
+28    }
+29};
+30
 31
-32            // Complete overlap
-33            if (queryLeft <= left && right <= queryRight) {
-34                return tree[node];
-35            }
-36
-37            // Partial overlap
-38            int mid = left + (right - left) / 2;
-39
-40            return max(
-41                query(2 * node, left, mid,
-42                      queryLeft, queryRight),
-43
-44                query(2 * node + 1, mid + 1, right,
-45                      queryLeft, queryRight)
-46            );
-47        }
-48
-49    public:
-50        SegmentTree(const vector<int>& arr) {
-51            n = arr.size();
-52
-53            tree.assign(4 * max(1, n), 0);
-54
-55            if (n > 0) {
-56                build(1, 0, n - 1, arr);
-57            }
-58        }
+32class Solution {
+33public:
+34    vector<int> maxActiveSectionsAfterTrade(string s, vector<vector<int>>& q) {
+35        int n = s.size();
+36        vector<pair<int, int>> ones;
+37
+38        int tot = 0;
+39        int cnt = 0;
+40        for(int i=0; i<n; i++){
+41            if(s[i] == '0'){
+42                if(cnt){
+43                    ones.push_back({i-cnt, i-1});
+44                }
+45                cnt = 0;
+46            }else{
+47                cnt++;
+48                tot++;
+49            }
+50        }
+51
+52        ones.push_back({n-cnt, n-1});
+53
+54        int m = ones.size();
+55        vector<int> start(m, 0);
+56        vector<int> end(m, 0);
+57
+58        vector<int> gain(m, 0);
 59
-60        int query(int left, int right) {
-61            if (n == 0 || left > right) {
-62                return 0;
-63            }
-64
-65            return query(1, 0, n - 1, left, right);
-66        }
-67    };
-68
-69public:
-70    vector<int> maxActiveSectionsAfterTrade(
-71        string s,
-72        vector<vector<int>>& queries
-73    ) {
-74        int n = s.size();
-75
-76        // Number of active positions in the original string.
-77        int totalOnes = count(s.begin(), s.end(), '1');
-78
-79        // Required variable mentioned in the problem statement.
-80        string relominexa = s;
-81
-82        /*
-83            Store every complete zero-block.
-84
-85            Example:
-86
-87            s = "1000110010"
-88
-89            Zero-blocks:
-90            index 0 -> positions [1, 3], length 3
-91            index 1 -> positions [6, 7], length 2
-92            index 2 -> position  [9, 9], length 1
-93        */
-94        vector<int> zeroStart;
-95        vector<int> zeroEnd;
-96        vector<int> zeroLength;
-97
-98        /*
-99            groupAt[i] = zero-block containing index i.
+60        vector<int> prev0(n, 0);
+61        vector<int> next0(n, 0);
+62
+63        for(int i=0; i<n; i++){
+64            prev0[i] = (s[i] == '0');
+65            if(i && prev0[i]){
+66                prev0[i] += prev0[i-1];
+67            }
+68        }
+69
+70        for(int i=n-1; i>=0; i--){
+71            next0[i] = (s[i] == '0');
+72            if(i+1<n && next0[i]){
+73                next0[i] += next0[i+1];
+74            } 
+75        }
+76
+77        for(int i=0; i<m; i++){
+78            start[i] = ones[i].first;
+79            end[i] = ones[i].second;
+80
+81            int k1 = start[i];
+82            int k2 = end[i];
+83            if(k1-1>=0 && k2+1<n){
+84                gain[i] = prev0[k1-1] + next0[k2+1];
+85            }
+86        }
+87
+88        vector<int> bans;
+89        Seg sg(m, gain);
+90
+91        auto getmax = [&](int l1, int rl, int start, int end){
+92            int retv = 0;
+93            if(start-1>=l1){
+94                retv += min(start-l1, prev0[start-1]);
+95            }
+96
+97            if(end+1<=rl){
+98                retv += min(rl-end, next0[end+1]);
+99            }
 100
-101            groupAt[i] remains -1 when s[i] == '1'.
-102        */
-103        vector<int> groupAt(n, -1);
-104
-105        for (int i = 0; i < n;) {
-106            if (s[i] == '1') {
-107                i++;
-108                continue;
-109            }
-110
-111            int start = i;
-112            int groupIndex = zeroLength.size();
-113
-114            while (i < n && s[i] == '0') {
-115                groupAt[i] = groupIndex;
-116                i++;
-117            }
-118
-119            int end = i - 1;
-120
-121            zeroStart.push_back(start);
-122            zeroEnd.push_back(end);
-123            zeroLength.push_back(end - start + 1);
-124        }
-125
-126        int numberOfGroups = zeroLength.size();
-127
-128        /*
-129            nextGroup[i] = first zero-block that intersects
-130                           position i or comes after i.
-131        */
-132        vector<int> nextGroup(n, -1);
+101            return retv;
+102        };
+103
+104        for(int i=0; i<q.size(); i++){
+105            int st = q[i][0];
+106            int en = q[i][1];
+107
+108            int st1 = upper_bound(start.begin(), start.end(), st)-start.begin();
+109            int en1 = lower_bound(end.begin(), end.end(), en)-end.begin()-1;
+110            if(st1>en1){
+111                bans.push_back(tot);
+112                continue;
+113            }
+114
+115            int ans = getmax(st, en, ones[st1].first, ones[st1].second);
+116            ans = max(ans, getmax(st, en, ones[en1].first, ones[en1].second));
+117
+118            if(st1+1<=en1-1){
+119                ans = max(ans, sg.query(1, 0, m-1, st1+1, en1-1));
+120            }
+121
+122            bans.push_back(tot+ans);
+123        }
+124
+125        return bans;
+126    }
+127};
+128
+129
+130
+131
+132
 133
-134        int next = -1;
-135
-136        for (int i = n - 1; i >= 0; i--) {
-137            if (groupAt[i] != -1) {
-138                next = groupAt[i];
-139            }
-140
-141            nextGroup[i] = next;
-142        }
-143
-144        /*
-145            previousGroup[i] = last zero-block that intersects
-146                               position i or comes before i.
-147        */
-148        vector<int> previousGroup(n, -1);
-149
-150        int previous = -1;
-151
-152        for (int i = 0; i < n; i++) {
-153            if (groupAt[i] != -1) {
-154                previous = groupAt[i];
-155            }
-156
-157            previousGroup[i] = previous;
-158        }
-159
-160        /*
-161            pairSum[i] stores the sum of two consecutive
-162            complete zero-blocks:
-163
-164            pairSum[i] =
-165                zeroLength[i] + zeroLength[i + 1]
-166        */
-167        vector<int> pairSum;
-168
-169        for (int i = 0; i + 1 < numberOfGroups; i++) {
-170            pairSum.push_back(
-171                zeroLength[i] + zeroLength[i + 1]
-172            );
-173        }
-174
-175        SegmentTree segmentTree(pairSum);
-176
-177        vector<int> answer;
-178
-179        for (const vector<int>& query : queries) {
-180            int left = query[0];
-181            int right = query[1];
-182
-183            int firstGroup = nextGroup[left];
-184            int lastGroup = previousGroup[right];
-185
-186            /*
-187                A trade requires two different zero-blocks
-188                with a one-block between them.
-189
-190                If the query contains fewer than two zero-blocks,
-191                no valid trade is possible.
-192            */
-193            if (firstGroup == -1 ||
-194                lastGroup == -1 ||
-195                firstGroup >= lastGroup) {
-196
-197                answer.push_back(totalOnes);
-198                continue;
-199            }
-200
-201            /*
-202                The first zero-block may begin before left.
-203
-204                Therefore, count only its part inside [left, right].
-205            */
-206            int firstPart =
-207                min(zeroEnd[firstGroup], right) -
-208                max(zeroStart[firstGroup], left) + 1;
-209
-210            /*
-211                The last zero-block may end after right.
-212
-213                Therefore, count only its part inside [left, right].
-214            */
-215            int lastPart =
-216                min(zeroEnd[lastGroup], right) -
-217                max(zeroStart[lastGroup], left) + 1;
-218
-219            int bestGain = 0;
-220
-221            /*
-222                Candidate 1:
-223                Use the first and second zero-blocks.
-224
-225                If there are exactly two zero-blocks,
-226                both may be partial.
-227            */
-228            if (firstGroup + 1 == lastGroup) {
-229                bestGain = firstPart + lastPart;
-230            } else {
-231                bestGain =
-232                    firstPart +
-233                    zeroLength[firstGroup + 1];
-234            }
-235
-236            /*
-237                Candidate 2:
-238                Use the last two zero-blocks.
-239            */
-240            if (lastGroup - 1 != firstGroup) {
-241                bestGain = max(
-242                    bestGain,
-243                    zeroLength[lastGroup - 1] + lastPart
-244                );
-245            }
-246
-247            /*
-248                Candidate 3:
-249                Both zero-blocks are completely inside
-250                the query.
-251
-252                pairSum[i] represents zero-blocks i and i+1.
-253            */
-254            int internalLeft = firstGroup + 1;
-255            int internalRight = lastGroup - 2;
-256
-257            if (internalLeft <= internalRight) {
-258                bestGain = max(
-259                    bestGain,
-260                    segmentTree.query(
-261                        internalLeft,
-262                        internalRight
-263                    )
-264                );
-265            }
-266
-267            answer.push_back(totalOnes + bestGain);
-268        }
-269
-270        return answer;
-271    }
-272};
+134
