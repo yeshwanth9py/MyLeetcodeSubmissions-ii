@@ -1,0 +1,1 @@
+distinct_nums = set(nums)
