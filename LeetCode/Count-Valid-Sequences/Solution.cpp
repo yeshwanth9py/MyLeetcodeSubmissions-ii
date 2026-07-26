@@ -2,7 +2,7 @@
 2long long invfact[500022];
 3const long long mod = 1e9+7;
 4
-5static int cnt = 0;
+5int cnt = 0;
 6
 7long long binpow(long long x, long long n, long long mod){
 8    if(n == 0) return 1;
@@ -43,15 +43,16 @@
 43        cnt++;
 44        preFact();
 45    }
-46    int countValidSequences(long long n, long long k) {
-47        if(n<k) return 0;
-48        long long tot = ncr(n-1, k-1);
-49        if(n%2 == k%2 && n>=k){
-50            long long extra = (n-k)/2;
-51            extra = ncr(extra+k-1, k-1);
-52            tot = (tot-extra+mod)%mod;
-53        }
-54
-55        return tot;
-56    }
-57};
+46
+47    int countValidSequences(long long n, long long k) {
+48        if(n<k) return 0;
+49        long long tot = ncr(n-1, k-1);
+50        if(n%2 == k%2 && n>=k){
+51            long long extra = (n-k)/2;
+52            extra = ncr(extra+k-1, k-1);
+53            tot = (tot-extra+mod)%mod;
+54        }
+55
+56        return tot;
+57    }
+58};
