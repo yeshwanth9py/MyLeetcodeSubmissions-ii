@@ -2,7 +2,7 @@
 2long long invfact[500022];
 3const long long mod = 1e9+7;
 4
-5int cnt = 0;
+5static int cnt = 0;
 6
 7long long binpow(long long x, long long n, long long mod){
 8    if(n == 0) return 1;
