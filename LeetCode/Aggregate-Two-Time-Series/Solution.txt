@@ -1,0 +1,33 @@
+1class Solution {
+2public:
+3    vector<vector<int>> aggregateTimeSeries(vector<vector<int>>& s1, vector<vector<int>>& s2) {
+4        int i = 0;
+5        int j = 0;
+6        vector<vector<int>> ans;
+7        
+8        while(i<s1.size() && j<s2.size()){
+9            if(s1[i][0] == s2[j][0]){
+10                ans.push_back({s1[i][0], s1[i][1] + s2[j][1]});
+11                i++;
+12                j++;
+13            }else if(s1[i][0]<s2[j][0]){
+14                ans.push_back({s1[i][0], s1[i][1] + s2[j][1]});
+15                i++;
+16            }else{
+17                ans.push_back({s2[j][0], s1[i][1] + s2[j][1]});
+18                j++;
+19            }
+20        }
+21
+22        while(i<s1.size()){
+23            ans.push_back({s1[i][0], s1[i][1]});
+24            i++;
+25        }
+26        
+27        while(j<s2.size()){
+28            ans.push_back({s2[j][0], s2[j][1]});
+29            j++;
+30        }
+31        return ans;
+32    }
+33};
