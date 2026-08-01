@@ -1,0 +1,45 @@
+1class Solution {
+2public:
+3    long long minInitialStrength(vector<int>& arr, vector<vector<int>>& b) {
+4        long long n = arr.size();
+5        vector<long long> bon(n, 0);
+6        for(auto el: b){
+7            long long i = el[0];
+8            long long j = el[1];
+9            long long val = el[2];
+10            bon[i] += val;
+11            if(j+1<n) bon[j+1] -= val;
+12        }
+13
+14        for(long long i=1; i<n; i++){
+15            bon[i] += bon[i-1];
+16        }
+17
+18        auto check = [&](long long mid){
+19            long long cur = mid;
+20            for(long long i=0; i<n; i++){
+21                long long ncur = cur+bon[i];
+22                if(ncur<arr[i]) return 0;
+23                cur -= arr[i];
+24                if(cur<0) cur = 0;
+25            }
+26            return 1;
+27        };
+28
+29        long long lo = 0;
+30        long long hi = 1e18;
+31        long long ans = 0;
+32
+33        while(lo<=hi){
+34            long long mid = (lo+hi)/2;
+35            if(check(mid)){
+36                ans = mid;
+37                hi = mid-1;
+38            }else{
+39                lo = mid+1;
+40            }
+41        }
+42        
+43        return ans;
+44    }
+45};
