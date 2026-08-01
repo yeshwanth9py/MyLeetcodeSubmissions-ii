@@ -1,0 +1,19 @@
+1class Solution {
+2public:
+3    int countValidPrefixes(string s) {
+4        int cnt = 0;
+5        int ans = 0;
+6        for(int i=0; i<s.size(); i++){
+7            if(s[i] == '0'){
+8                cnt--;
+9            }else{
+10                cnt++;
+11            }
+12            if(cnt == 0 || cnt == 1 || cnt == -1){
+13                ans++;
+14            }
+15        }
+16
+17        return ans;
+18    }
+19};
