@@ -1,0 +1,26 @@
+1class Solution:
+2    def maximumWidth(self, planks: list[int]) -> int:
+3        freq = {}
+4        res = 0
+5        
+6        for i in planks:
+7            freq[i] = freq.get(i,0)+1
+8            res = max(res,freq[i])
+9        
+10        used = {}
+11
+12        for i in range(len(planks)):
+13            for j in range(i+1,len(planks)):
+14                target = planks[i]+planks[j]
+15
+16                if target not in used:
+17                    used[target] = set()
+18                
+19                if i not in used[target] and j not in used[target]:
+20                    used[target].add(i)
+21                    used[target].add(j)
+22        
+23        for i in used.keys():
+24            res = max(res,freq.get(i,0)+len(used[i])//2)
+25        
+26        return res
