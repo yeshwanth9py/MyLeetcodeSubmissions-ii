@@ -1,0 +1,28 @@
+1class Solution {
+2public:
+3    double minPrice(vector<int>& pri, vector<int>& dis) {
+4        int n = pri.size();
+5        sort(pri.begin(), pri.end());
+6        sort(dis.begin(), dis.end());
+7
+8        int j = dis.size()-1;
+9        int i = n-1;
+10
+11        double ans = 0.0;
+12        while(i>=0){
+13            double cur = pri[i];
+14            if(j>=0){
+15                cur = (cur*(100-dis[j]))/100;
+16                // cout<<cur<<" ";
+17                
+18                j--;
+19            }
+20            ans += cur;
+21            i--;
+22        }
+23
+24        return ans;
+25
+26        
+27    }
+28};
