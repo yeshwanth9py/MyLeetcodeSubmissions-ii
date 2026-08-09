@@ -1,0 +1,32 @@
+1class Solution {
+2public:
+3    vector<long long> dep;
+4    long long ht;
+5    vector<vector<long long>> adjl;
+6    void dfs(long long node, long long dd){
+7        dep[node] = dd;
+8        // cout<<node<<" ";
+9        for(long long nei: adjl[node]){
+10            dfs(nei, dd+1);
+11        }
+12        ht = max(ht, dd);
+13    }
+14    
+15    long long weightedSum(vector<int>& parent, vector<int>& nums) {
+16        ht = 0;
+17        long long n = parent.size();
+18        dep.resize(n, 0);
+19        adjl.resize(n, vector<long long>());
+20        for(long long i=1; i<n; i++){
+21            long long pp = parent[i];
+22            adjl[pp].push_back(i);
+23        }
+24        dfs(0, 0);
+25        long long ans = 0;
+26        for(long long i=0; i<n; i++){
+27            ans += nums[i]*(ht - dep[i]+1);
+28        }
+29
+30        return ans;
+31    }
+32};
