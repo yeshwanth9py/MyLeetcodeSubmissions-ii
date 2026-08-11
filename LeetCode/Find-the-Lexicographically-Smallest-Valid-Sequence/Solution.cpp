@@ -1,87 +1,84 @@
 1class Solution {
 2public:
-3    vector<int> validSequence(string s1, string s2) {
-4        int n = s1.size();
-5        int m = s2.size();
-6
-7        vector<int> pref(n, 0);
-8        vector<int> suf(n, 0);
-9
-10        int j = 0;
-11
-12        // pref[i] = how many characters of s2
-13        // we can match before index i
-14        for(int i = 0; i < n; i++){
-15            pref[i] = j;
-16
-17            if(j < m && s1[i] == s2[j]){
-18                j++;
-19            }
-20        }
-21
-22        j = m - 1;
-23        int cnt = 0;
-24
-25        // suf[i] = how many characters at the END of s2
-26        // we can match using positions AFTER i
-27        for(int i = n - 1; i >= 0; i--){
-28            suf[i] = cnt;
-29
-30            if(j >= 0 && s1[i] == s2[j]){
-31                j--;
-32                cnt++;
-33            }
-34        }
-35
-36        // Try every possible FIRST index.
-37        for(int ind = 0; ind < n; ind++){
-38
-39            if(pref[ind] + suf[ind] + 1 >= m ||
-40               pref[ind] + suf[ind] >= m - 1){
+3    int n, m;
+4    vector<int> validSequence(string w1, string w2) {
+5        n = w1.size();
+6        m = w2.size();
+7
+8        vector<int> pref(n, 0);
+9        vector<int> suff(n, 0);
+10
+11        int i = 0;
+12        for(int j=0; j<w1.size(); j++){
+13            pref[j] = i;
+14            if(i<n && w2[i] == w1[j]){
+15                i++;
+16            }
+17        }
+18
+19        i=w2.size()-1;
+20        int cnt = 0;
+21        for(int j=w1.size()-1; j>=0; j--){
+22            if(i>=0 && w2[i] == w1[j]){
+23                cnt++;
+24                i--;
+25            }
+26            suff[j] = cnt;
+27        }
+28
+29        auto printans = [&](int ind){
+30            vector<int> ans;
+31            int j = 0;
+32            // bool ch = 1;
+33
+34            for(int i=0; i<ind; i++){
+35                if(w1[i] == w2[j]){
+36                    ans.push_back(i);
+37                    j++;
+38                }
+39            }
+40            
 41
-42                vector<int> ans;
-43
-44                // Match before ind
-45                int k = 0;
-46
-47                for(int i = 0; i < ind; i++){
-48                    if(k < m && s1[i] == s2[k]){
-49                        ans.push_back(i);
-50                        k++;
-51                    }
-52                }
-53
-54                // ind is our first selected index.
-55                ans.push_back(ind);
-56                k++;
-57
-58                // Have we already used the mismatch?
-59                bool used = (s1[ind] != s2[pref[ind]]);
-60
-61                // Select the remaining characters.
-62                for(int i = ind + 1; i < n && k < m; i++){
-63
-64                    // If it matches normally, take it.
-65                    if(s1[i] == s2[k]){
-66                        ans.push_back(i);
-67                        k++;
-68                    }
+42            if(j == m){
+43                return ans;
+44            }
+45
+46            bool ch = 1;
+47
+48            if(w1[ind] == w2[j]){
+49                ans.push_back(ind);
+50                j++;
+51            }else{
+52                ans.push_back(ind);
+53                j++;
+54                ch = 0;
+55            }
+56
+57            for(int i=ind+1; i<n; i++){
+58                if(j<m && w1[i] == w2[j]){
+59                    ans.push_back(i);
+60                    j++;
+61                }else if(j<m && ch == 1){
+62                    ans.push_back(i);
+63                    ch = 0;
+64                    j++;
+65                }
+66            }
+67
+68            if(j>=m) return ans;
 69
-70                    // Otherwise use this as the one mismatch,
-71                    // BUT only if the suffix after i can finish
-72                    // the remaining characters.
-73                    else if(!used && suf[i] >= m - k - 1){
-74                        ans.push_back(i);
-75                        k++;
-76                        used = true;
-77                    }
-78                }
-79
-80                if(k == m)
-81                    return ans;
-82            }
-83        }
-84
-85        return {};
-86    }
-87};
+70            vector<int> retv;
+71            return retv;
+72        };
+73
+74        for(int i=0; i<n; i++){
+75            if(pref[i] + suff[i] >= m-1){
+76                vector<int> retv =  printans(i);
+77                cout<<i<<" ";
+78                if(retv.size() != 0) return retv;
+79            }
+80        }
+81
+82        return {};
+83    }
+84};
