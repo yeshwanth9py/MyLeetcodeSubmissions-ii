@@ -1,0 +1,10 @@
+1class Solution {
+2public:
+3    int elevatorRequests(int n, vector<int>& arr) {
+4        int ans = arr[0];
+5        for(int i=1; i<arr.size(); i++){
+6            ans += abs(arr[i]-arr[i-1]);
+7        }
+8        return ans;
+9    }
+10};
