@@ -28,45 +28,35 @@
 28            if(a.second == 0 || b.second == 0){
 29                return a.second<b.second;
 30            }
-31            // if(a.first>0 && a.second>0 && b.first>0 && b.second>0){
-32            //     return a.second<b.second;
-33            // }
-34            // return a.first>b.first;
+31
+32            if(a.first == 0 || b.first == 0){
+33                return a.first>b.first;
+34            }
 35
-36                // Both are only 1s.
-37                if (a.second == 0 && b.second == 0){ 
-38                    return a.first > b.first;
-39                }
-40                // Case 2:
-41                // Segments having only 0s go last.
-42                if (a.first == 0 && b.first != 0){
-43                    return false;
-44                }
-45                if (a.first != 0 && b.first == 0){
-46                    return true;
-47                }
-48                // Both have at least one 1 and one 0.
-49                // More 1s first.
-50                if (a.first != b.first){
-51                    return a.first > b.first;
-52                }
+36            if(a.first == b.first){
+37                return a.second<b.second;
+38            }
+39
+40            return a.first>b.first;
+41        });
+42
+43        long long ans = 0;
+44
+45        for(long long i=0; i<n; i++){
+46            auto [no1, no0] = vec[i];
+47            // long long curv = (1<<ans-1) + (1<<ans-2) + (1<<ans-3)
+48            long long curv = ((binpow(2, tot)) - (binpow(2, tot-no1)) + mod)%mod;
+49            tot -= (no1+no0);
+50            ans += curv;
+51            ans = (ans%mod + mod)%mod;
+52        }
 53
-54                // Same number of 1s -> fewer 0s first.
-55                return a.second < b.second;
-56        });
-57
-58        long long ans = 0;
+54        return ans;
+55
+56    }
+57};
+58
 59
-60        for(long long i=0; i<n; i++){
-61            auto [no1, no0] = vec[i];
-62            // long long curv = (1<<ans-1) + (1<<ans-2) + (1<<ans-3)
-63            long long curv = ((binpow(2, tot)) - (binpow(2, tot-no1)) + mod)%mod;
-64            tot -= (no1+no0);
-65            ans += curv;
-66            ans = (ans%mod + mod)%mod;
-67        }
-68
-69        return ans;
-70
-71    }
-72};
+60
+61
+62
