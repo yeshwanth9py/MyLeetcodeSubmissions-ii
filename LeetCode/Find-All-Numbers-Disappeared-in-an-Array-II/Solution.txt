@@ -1,0 +1,26 @@
+1class Solution {
+2public:
+3    vector<vector<int>> findDisappearedNumbers(vector<int>& nums, int lo, int up) {
+4        vector<int> all;
+5        sort(nums.begin(), nums.end());
+6        for(int i=lo; i<=up; i++){
+7            auto it = lower_bound(nums.begin(), nums.end(), i);
+8            if(it != nums.end() && (*it == i)) continue;
+9            all.push_back(i);
+10        }
+11
+12        vector<vector<int>> all2;
+13        int i=0;
+14        int n = all.size();
+15        while(i<n){
+16            int j = i;
+17            while(j+1<n && all[j+1]-all[j] == 1){
+18                j++;
+19            }
+20            all2.push_back({all[i], all[j]});
+21            i = j+1;
+22        }
+23
+24        return all2;
+25    }
+26};
