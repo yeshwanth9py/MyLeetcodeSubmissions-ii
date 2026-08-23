@@ -1,0 +1,86 @@
+1class Solution {
+2public:
+3    vector<int> getprimes(int num){
+4        vector<int> ans;
+5        
+6        for(int i=2; i*i<=num; i++){
+7            if(num%i == 0){
+8                while(num%i == 0) num = num/i;
+9                ans.push_back(i);
+10            }
+11        }
+12        
+13        if(num>1){
+14            ans.push_back(num);
+15        }
+16
+17        return ans;
+18    }
+19    int longestSubarray(vector<int>& nums, int k) {
+20        int n = nums.size();
+21        int lo = 1;
+22        int hi = n;
+23        int ans = 0;
+24
+25        vector<vector<int>> pnums;
+26        for(int i=0; i<n; i++){
+27            vector<int> allp = getprimes(nums[i]);
+28            pnums.push_back(allp);
+29        }
+30
+31        auto check = [&](int mid){
+32            unordered_map<int, int> allp;
+33            int ans = 1e9;
+34            int cur = 0;
+35            
+36            for(int i=0; i<mid; i++){
+37                vector<int> &pri = pnums[i];
+38                for(int el: pri){
+39                    allp[el]++;
+40                    if(allp[el] == 1){
+41                        cur++;
+42                    }
+43                }
+44            }
+45
+46            ans = min(ans, cur);
+47
+48            int i=mid;
+49            while(i<n){
+50                vector<int> &pri = pnums[i-mid];
+51                for(int el: pri){
+52                    allp[el]--;
+53                    if(allp[el] == 0){
+54                        cur--;
+55                    }
+56                }
+57                vector<int> &pri2 = pnums[i];
+58                for(int el: pri2){
+59                    allp[el]++;
+60                    if(allp[el] == 1){
+61                        cur++;
+62                    }
+63                }
+64                ans = min(ans, cur);
+65                i++;
+66            }
+67
+68            return ans<=k;
+69        };
+70
+71        
+72        while(lo<=hi){
+73            int mid = (lo+hi)/2;
+74            if(check(mid)){
+75                ans = mid;
+76                lo = mid+1;
+77            }else{
+78                hi = mid-1;
+79            }
+80        }
+81
+82        return ans;
+83
+84        
+85    }
+86};
