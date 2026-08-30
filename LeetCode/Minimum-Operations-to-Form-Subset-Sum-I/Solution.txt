@@ -1,0 +1,47 @@
+1class Solution {
+2public:
+3    int n;
+4    vector<int> arr;
+5    int dp[101][5010];
+6    int rec(int ind, int remsum){
+7        if(remsum<0) return 1e9;
+8        if(remsum==0){
+9            return 0;
+10        }
+11        
+12        if(ind == n){
+13            return 1e9;
+14        }
+15        if(dp[ind][remsum] != -1) return dp[ind][remsum];
+16        int cur = arr[ind];
+17        int ans = rec(ind+1, remsum);
+18        int dcur = cur;
+19
+20        int op = 0;
+21        while(cur<=remsum){
+22            ans = min(ans, op + rec(ind+1, remsum-cur));
+23            cur = cur*2;
+24            op++;
+25        }
+26
+27        cur = dcur;
+28        op=0;
+29        while(cur>0){
+30            ans = min(ans, op + rec(ind+1, remsum-cur));
+31            cur = cur/2;
+32            op++;
+33        }
+34
+35        return dp[ind][remsum] = ans;
+36    }
+37    
+38    int minOperations(vector<int>& nums, int sum) {
+39        n = nums.size();
+40        arr = nums;
+41        memset(dp, -1, sizeof(dp));
+42        int ans = rec(0, sum);
+43        if(ans>=1e8) return -1;
+44        return ans;
+45    }
+46    
+47};
