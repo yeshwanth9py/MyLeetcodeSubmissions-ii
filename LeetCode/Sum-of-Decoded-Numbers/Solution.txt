@@ -1,0 +1,30 @@
+1class Solution {
+2public:
+3    long long mod = 1e9+7;
+4    long long binpow(long long x, long long y){
+5        if(y == 0) return 1;
+6        long long ans = binpow(x, y/2);
+7        ans = ((ans*ans)%mod + mod)%mod;
+8        if(y&1){
+9            ans = ((ans*x)%mod + mod)%mod;
+10        }
+11        return ans;
+12    }
+13    
+14    int sumDecoded(vector<long long>& nums) {
+15        long long ans = 0;
+16        for(auto el: nums){
+17            string s = to_string(el);
+18            int ld = s.back()-'0';
+19            s.pop_back();
+20            string x = s.substr(0, ld);
+21            string y = s.substr(ld);
+22            long long xx = stoll(x);
+23            long long yy = stoll(y);
+24            long long cur = binpow(xx, yy);
+25            ans = ((ans + cur)%mod + mod)%mod;
+26        }
+27
+28        return ans;
+29    }
+30};
