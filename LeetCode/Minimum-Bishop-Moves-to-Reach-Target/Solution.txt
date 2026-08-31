@@ -1,0 +1,16 @@
+1class Solution {
+2public:
+3    int minBishopMoves(vector<int>& src, vector<int>& tgt) {
+4        int x1 = src[0];
+5        int y1 = src[1];
+6        int x2 = tgt[0];
+7        int y2 = tgt[1];
+8        if((src[0]+src[1])%2 == (tgt[0]+tgt[1])%2){
+9            if(x1+y1 == x2+y2) return 1;
+10            if(x1-y1 == x2-y2) return 1;
+11            return 2;
+12        }else{
+13            return -1;
+14        }
+15    }
+16};
