@@ -1,7 +1,7 @@
 1class Solution {
 2public:
 3    vector<int> arr;
-4    long long dp[301][5001];
+4    unsigned int dp[301][5001];
 5    int amt;
 6
 7    int rec(){
@@ -12,8 +12,8 @@
 12                    continue;
 13                }
 14
-15                long long dontake = dp[ind+1][rem];
-16                long long take = (rem-arr[ind]>=0 ? dp[ind][rem-arr[ind]] : 0);
+15                unsigned int dontake = dp[ind+1][rem];
+16                unsigned int take = (rem-arr[ind]>=0 ? dp[ind][rem-arr[ind]] : 0);
 17
 18                if(dontake > INT_MAX - take)
 19                    dp[ind][rem] = INT_MAX;
@@ -27,7 +27,6 @@
 27    int change(int amount, vector<int>& coins) {
 28        arr = coins;
 29        amt = amount;
-30        memset(dp, -1, sizeof(dp));
-31        return rec();
-32    }
-33};
+30        return rec();
+31    }
+32};
